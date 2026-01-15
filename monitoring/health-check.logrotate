@@ -1,0 +1,21 @@
+/var/log/platforms/health.log {
+    daily
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    create 0640 platforms platforms
+    sharedscripts
+    postrotate
+        systemctl reload platforms-monitor > /dev/null 2>&1 || true
+    endscript
+}
+
+/var/log/platforms/metrics.json {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    notifempty
+    create 0640 platforms platforms
+}

@@ -1,0 +1,21 @@
+[Unit]
+Description=Platform Health Monitor (Guardian Watchdog)
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=platforms
+WorkingDirectory=/opt/platforms
+ExecStart=/usr/bin/node monitoring/health-check.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+Environment="PLATFORM_BASE_URL=http://localhost:3000"
+Environment="CHECK_INTERVAL=30000"
+Environment="LOG_FILE=/var/log/platforms/health.log"
+Environment="METRICS_FILE=/var/log/platforms/metrics.json"
+
+[Install]
+WantedBy=multi-user.target
