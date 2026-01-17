@@ -4,7 +4,7 @@ index.html:
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sanders Global Platforms - Freedom33</title>
+    <title>Sanders Global Platforms - Freedom35</title>
     <style>
         body { font-family: Arial, sans-serif; background: #0a0a0a; color: #00ff00; padding: 20px; }
         .platform { background: #1a1a1a; border: 1px solid #00ff00; padding: 15px; margin: 10px 0; border-radius: 5px; }
@@ -212,6 +212,26 @@ Object.entries(platforms).forEach(([name, data]) => {
     "lucide-react": "^0.263.1"
   }
 }
+SLUG=$(echo "$PLATFORM" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+mkdir -p "$BASE_DIR/$SLUG"/{logs,data,config,audio,video,voices,calls,audits}
+# JSON export
+echo "  \"$PLATFORM\": { \"naic\": \"$NAIC\", \"url\": \"$URL\" }$comma" >> "$EXPORT_FILE"
+# SPAWN DASHBOARD SNIPPET
+DASHBOARD_FILE="$BASE_DIR/index.html"
+echo "<div class='grid'>" > "$DASHBOARD_FILE"
+
+for PLATFORM in "${!PLATFORM_REGISTRY[@]}"; do
+    IFS='|' read -r NAIC URL <<< "${PLATFORM_REGISTRY[$PLATFORM]}"
+    SLUG=$(echo "$PLATFORM" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+
+    echo "<a href='$URL' class='card'>" >> "$DASHBOARD_FILE"
+    echo "  <div><h3>$PLATFORM</h3></div>" >> "$DASHBOARD_FILE"
+    echo "  <div class='naic'>NAIC: $NAIC</div>" >> "$DASHBOARD_FILE"
+    echo "</a>" >> "$DASHBOARD_FILE"
+done
+
+echo "</div>" >> "$DASHBOARD_FILE"
+
 platforms = {
   "Sanders AI Doctor": { naic: "621111,541618,561612,541110,541512,611430", url: "https://ai-doctor.sandershomehealthcare.com" },
   "Sanders AI Psychiatrist": { naic: "621330,541618,561612,541110,541512,611430", url: "https://ai-psychiatrist.sandershomehealthcare.com" },
@@ -261,3 +281,125 @@ Object.entries(platforms).forEach(([name, data]) => {
   `;
   container.appendChild(div);
 });
+#!/bin/bash
+# ======================================================
+# SANDERS GLOBAL HARD-LOCK DEPLOYMENT SCRIPT (FREEDOM33)
+# Full Deployment: Platforms, Twin Watchdogs, NAIC Codes
+# Hard Lock: Immutable, V5 Resource-Locked
+# Author: Sanders Family Trust
+# ======================================================
+
+set -euo pipefail
+
+BASE_DIR="/srv/sanders/platforms"
+LOG_DIR="/srv/sanders/logs"
+EXPORT_DIR="/srv/sanders/baseline/export"
+mkdir -p $BASE_DIR/{audio,video,voices,calls,automation,audits,data,config} $LOG_DIR $EXPORT_DIR
+
+# ---------------------------
+# PLATFORM LIST & NAIC CODES
+# ---------------------------
+declare -A PLATFORM_REGISTRY
+
+PLATFORM_REGISTRY["Sanders AI Doctor"]="621111,541618,561612,541110,541512,611430|https://ai-doctor.sandershomehealthcare.com"
+PLATFORM_REGISTRY["Sanders AI Psychiatrist"]="621330,541618,561612,541110,541512,611430|https://ai-psychiatrist.sandershomehealthcare.com"
+PLATFORM_REGISTRY["Sanders AI Recognition"]="541511,541618,561612,523991,518210,611710|https://ai-recognition.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Omniconm"]="621399,541611,561612,541614,541715,611430|https://omniconm.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Steward Sentinel"]="621610,541618,561612,541611,541512,611430|https://steward-sentinel.sanderssecurestack.com"
+PLATFORM_REGISTRY["Sanders Patriot Saint"]="621399,922190,561612,523991,541715,611430|https://patriot-saint.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Gia Mind Balance"]="621111,541618,561612,541110,541512,611710|https://gia-mind.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Grantwriter"]="621610,541611,561612,523991,541512,611430|https://grantwriter.sanders.global"
+PLATFORM_REGISTRY["Sanders Freedom Revolution"]="621399,541618,561612,541614,518210,611430|https://freedom-rev.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Tactical Training"]="621610,541611,561612,541614,541512,611430|https://tactical-training.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Martial Academy"]="621610,922190,561612,541110,541715,611430|https://martial-academy.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Leadership Institute"]="621111,541618,561612,541611,541512,611430|https://leadership-institute.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Fitness & Wellness"]="621399,541618,561612,541110,518210,611430|https://fitness-wellness.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Advanced Academics"]="621330,541611,561612,541110,541512,611710|https://advanced-academics.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Recon Ops"]="621399,541618,561612,523991,541715,611430|https://recon-ops.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Guardian Sentinel"]="621610,541611,561612,541611,541512,611430|https://guardian-sentinel.sanderssecurestack.com"
+PLATFORM_REGISTRY["Sanders Big Data Mind"]="621399,541618,561612,523991,518210,611430|https://big-data-mind.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Strategy Hub"]="621111,541611,561612,541614,541512,611430|https://strategy-hub.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Global Freedom"]="621399,541618,561612,541611,541715,611430|https://global-freedom.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Health Solutions"]="621111,541611,561612,541110,518210,611430|https://health-solutions.sandershomehealthcare.com"
+PLATFORM_REGISTRY["Sanders Coordinator"]="621610,541618,561612,523991,541512,611430|https://sanders-coordinator.vercel.app"
+PLATFORM_REGISTRY["Sanders Intelligence Ops"]="621399,541611,561612,541110,541512,611430|https://intel-ops.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Family Council"]="621111,541618,561612,541611,541512,611430|https://family-council.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Elite Leadership"]="621330,541611,561612,541614,541512,611430|https://elite-leadership.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Combat Academy"]="621399,541618,561612,541110,541512,611430|https://combat-academy.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Tactical Edge"]="621111,541611,561612,541614,541512,611430|https://tactical-edge.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Wellness Center"]="621399,541618,561612,541110,518210,611430|https://wellness-center.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Knowledge Base"]="621330,541611,561612,541110,541512,611430|https://knowledge-base.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders AI Strategy"]="621111,541618,561612,541614,541512,611430|https://ai-strategy.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Freedom Ops"]="621399,541611,561612,541611,541715,611430|https://freedom-ops.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Mind Guardian"]="621111,541618,561612,541110,541512,611430|https://mind-guardian.sandersglobal.com"
+PLATFORM_REGISTRY["Sanders Watchdog Alpha"]="621399,541611,561612,523991,541512,611430|https://watchdog-alpha.sanderssecurestack.com"
+PLATFORM_REGISTRY["Sanders Watchdog Beta"]="621399,541618,561612,523991,541512,611430|https://watchdog-beta.sanderssecurestack.com"
+PLATFORM_REGISTRY["Lil Mama"]="621399,541618,561612,523991,541512,611430|https://twin-lil-mama.sanderssecurestack.com"
+PLATFORM_REGISTRY["Baby Girl"]="621399,541618,561612,523991,541512,611430|https://twin-baby-girl.sanderssecurestack.com"
+
+# ---------------------------
+# EXPORT FOR GITHUB SYNC
+# ---------------------------
+EXPORT_FILE="$EXPORT_DIR/platform_registry.json"
+echo "{" > "$EXPORT_FILE"
+i=0
+for PLATFORM in "${!PLATFORM_REGISTRY[@]}"; do
+  IFS='|' read -r NAIC URL <<< "${PLATFORM_REGISTRY[$PLATFORM]}"
+  i=$((i+1))
+  comma=","
+  [[ $i -eq ${#PLATFORM_REGISTRY[@]} ]] && comma=""
+  echo "  \"$PLATFORM\": { \"naic\": \"$NAIC\", \"url\": \"$URL\" }$comma" >> "$EXPORT_FILE"
+done
+echo "}" >> "$EXPORT_FILE"
+
+chattr +i "$EXPORT_FILE"
+
+# ---------------------------
+# SPAWN SYSTEMD SERVICES & WATCHDOGS
+# ---------------------------
+for PLATFORM in "${!PLATFORM_REGISTRY[@]}"; do
+    SLUG=$(echo "$PLATFORM" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+    mkdir -p "$BASE_DIR/$SLUG"/{logs,data,config,audio,video,voices,calls,audits}
+
+    # Register in audit
+    echo "$(date -u) | Platform: $PLATFORM | NAIC: ${PLATFORM_REGISTRY[$PLATFORM]%|*}" \
+        >> "$BASE_DIR/data/audits/global_registry.log"
+
+    # Systemd service
+    SERVICE_FILE="/etc/systemd/system/freedom33-platforms@$SLUG.service"
+    cat > "$SERVICE_FILE" <<EOF
+[Unit]
+Description=Freedom33 Platform $PLATFORM - Hard Locked Deployment
+After=network.target
+
+[Service]
+ExecStart=/bin/bash $BASE_DIR/automation/twin_watchdog.sh
+Restart=always
+User=root
+ProtectSystem=full
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    systemctl enable --now "freedom33-platforms@$SLUG.service"
+done
+
+# ---------------------------
+# FINAL HARD LOCKS
+# ---------------------------
+chattr -R +i "$BASE_DIR"
+chattr -R +i "$LOG_DIR"
+echo "✅ ALL PLATFORMS & WATCHDOGS DEPLOYED. SYSTEM HARD LOCK ACTIVE."
+
+# ---------------------------
+# V5 RESOURCE CHECK
+# ---------------------------
+systemctl status freedom33-platforms@* | grep -E "Active: active"
+
+# SHA256 baseline record
+sha256sum "$0" > /srv/sanders/baseline/FREEDOM33_BASELINE.sha256
+chattr +i /srv/sanders/baseline/FREEDOM33_BASELINE.sha256
+
+echo "🔒 DEPLOYMENT COMPLETE. V5 UNITY PROTOCOL ENFORCED."
