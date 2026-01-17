@@ -73,3 +73,11 @@ Object.entries(platforms).forEach(([name, data]) => {
   div.innerHTML = `<h3>${name}</h3><div class="naic">NAIC: ${data.naic}</div><a href="${data.url}" target="_blank">${data.url}</a>`;
   container.appendChild(div);
 });
+{
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
