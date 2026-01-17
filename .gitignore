@@ -1,12 +1,92 @@
+# Dependency Directories
 node_modules/
+jspm_packages/
+
+# Sanders System Logs (Hard-Locked on Server)
 *.log
-.DS_Store
+/srv/sanders/logs/
+
+# Environment & Secrets (V5 Security Layer)
 .env
 .env.local
 .env.*.local
+.env.production
+
+# Build Outputs
 dist/
 build/
-.turbo/
 .next/
 out/
-coverage/
+bin/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Sanders Baseline Exports (Do not track local temp files)
+/srv/sanders/baseline/export/*.tmp
+/Sanders-Ecosystem-Root
+├── v5Security.js           # The Gatekeeper (Generated previously)
+├── package.json            # Root dependencies (Express, Supabase)
+├── .gitignore              # The rules defined above
+├── .github/
+│   └── workflows/
+│       └── node.js.yml     # The 18/20/22 CI Pipeline
+└── platforms/
+    ├── sanders-ai-doctor/
+    │   ├── src/index.js    # Calls verifyV5Deployment()
+    │   └── package.json
+    └── twin-lil-mama/
+        ├── src/index.js
+        └── package.json
+
+const { verifyV5Deployment } = require('../../v5Security.js');
+verifyV5Deployment(process.env.V5_AGENT_KEY, 'sanders-ai-doctor');
+
+======================================================
+ * SANDERS GLOBAL V5 SECURITY ENGINE (FREEDOM33)
+ * Purpose: Strict Authorization & Deployment Validation
+ * Author: Sanders Family Trust
+ * ======================================================
+ */
+
+const PLATFORM_WHITELIST = new Set([
+  'sanders-ai-doctor', 'sanders-ai-psychiatrist', 'sanders-ai-recognition',
+  'sanders-omniconm', 'sanders-steward-sentinel', 'sanders-patriot-saint',
+  'sanders-gia-mind-balance', 'sanders-grantwriter', 'sanders-freedom-revolution',
+  'sanders-tactical-training', 'sanders-martial-academy', 'sanders-leadership-institute',
+  'sanders-fitness-wellness', 'sanders-advanced-academics', 'sanders-recon-ops',
+  'sanders-guardian-sentinel', 'sanders-big-data-mind', 'sanders-strategy-hub',
+  'sanders-global-freedom', 'sanders-health-solutions', 'sanders-coordinator',
+  'sanders-intelligence-ops', 'sanders-family-council', 'sanders-elite-leadership',
+  'sanders-combat-academy', 'sanders-tactical-edge', 'sanders-wellness-center',
+  'sanders-knowledge-base', 'sanders-ai-strategy', 'sanders-freedom-ops',
+  'sanders-mind-guardian', 'sanders-watchdog-alpha', 'sanders-watchdog-beta',
+  'twin-lil-mama', 'twin-baby-girl'
+]);
+
+/**
+ * Validates the deployment session against the Sanders V5 Agent Key.
+ * @param {string} userToken - The secret agent key provided by the CI/CD environment.
+ * @param {string} platformId - The slug of the platform being deployed.
+ */
+function verifyV5Deployment(userToken, platformId) {
+  const MASTER_KEY = process.env.V5_AGENT_KEY;
+
+  // 1. Token Integrity Check
+  if (!userToken || userToken !== MASTER_KEY) {
+    console.error("❌ [V5 ERROR]: Unauthorized Access Attempt. Token mismatch.");
+    throw new Error("Unauthorized: V5 token invalid");
+  }
+
+  // 2. Platform Whitelist Check
+  if (!PLATFORM_WHITELIST.has(platformId)) {
+    console.error(`❌ [V5 ERROR]: Platform '${platformId}' is not approved for deployment.`);
+    throw new Error(`Unauthorized: ${platformId} not approved`);
+  }
+
+  console.log(`✅ [V5 SUCCESS]: Authorization granted for ${platformId}.`);
+  return true;
+}
+
+module.exports = { verifyV5Deployment };
