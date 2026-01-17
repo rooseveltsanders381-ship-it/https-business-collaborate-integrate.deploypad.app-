@@ -1,0 +1,13 @@
+Keep index.html and platforms.js showing all 35 platforms as a visual dashboard. This won't run the actual Express servers, just displays the registry.
+Fix: Add a vercel.json file:
+{
+  "routes": [
+    { "src": "/", "dest": "/index.html" }
+  ]
+}
+Create vercel.json:
+{
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
