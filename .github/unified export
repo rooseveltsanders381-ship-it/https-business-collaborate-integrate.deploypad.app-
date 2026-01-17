@@ -1,3 +1,54 @@
+#!/bin/bash
+# ======================================================
+# SANDERS GLOBAL MASTER DEPLOYMENT (FREEDOM33)
+# Goal: Auto-populate Dashboard + Hard-Lock Server
+# ======================================================
+
+set -euo pipefail
+
+# 1. DIRECTORY SETUP
+BASE_DIR="/srv/sanders/platforms"
+EXPORT_DIR="/srv/sanders/baseline/export"
+mkdir -p $BASE_DIR/{automation,audits,data} $EXPORT_DIR
+
+# 2. THE REGISTRY (35 PLATFORMS)
+declare -A PLATFORMS
+PLATFORMS["Sanders AI Doctor"]="621111,541618|https://ai-doctor.sandershomehealthcare.com"
+PLATFORMS["Sanders AI Psychiatrist"]="621330,541618|https://ai-psychiatrist.sandershomehealthcare.com"
+PLATFORMS["Lil Mama"]="621399,541618|https://twin-lil-mama.sanderssecurestack.com"
+PLATFORMS["Baby Girl"]="621399,541618|https://twin-baby-girl.sanderssecurestack.com"
+# ... [Add remaining 31 platforms here] ...
+
+# 3. UNIFIED EXPORT (Clears the "Hold-up")
+# This generates the file your index.html is looking for!
+JS_FILE="$BASE_DIR/platforms.js"
+JSON_FILE="$EXPORT_DIR/platform_registry.json"
+
+echo "const platforms = {" > "$JS_FILE"
+echo "{" > "$JSON_FILE"
+
+i=0
+for NAME in "${!PLATFORMS[@]}"; do
+    IFS='|' read -r NAIC URL <<< "${PLATFORMS[$NAME]}"
+    SLUG=$(echo "$NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+    i=$((i+1))
+    comma=$([[ $i -eq ${#PLATFORMS[@]} ]] && echo "" || echo ",")
+
+    echo "  \"$NAME\": { naic: \"$NAIC\", url: \"$URL\" }$comma" >> "$JS_FILE"
+    echo "  \"$NAME\": { \"naic\": \"$NAIC\", \"url\": \"$URL\" }$comma" >> "$JSON_FILE"
+    
+    # 4. SPAWN SYSTEMD & FOLDERS
+    mkdir -p "$BASE_DIR/$SLUG"
+done
+
+echo "};" >> "$JS_FILE"
+echo "}" >> "$JSON_FILE"
+
+# 5. V5 HARD LOCK
+chattr +i "$JS_FILE" "$JSON_FILE"
+echo "✅ DASHBOARD SYNCED. SYSTEM HARD-LOCKED."
+
+
 # ---------------------------
 # UNIFIED EXPORT (JSON + JS DASHBOARD)
 # ---------------------------
