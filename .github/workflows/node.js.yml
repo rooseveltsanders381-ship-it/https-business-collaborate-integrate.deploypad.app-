@@ -8,3 +8,23 @@
         fi
       env:
         V5_AGENT_KEY: ${{ secrets.V5_AGENT_KEY }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanders Global Platforms - Freedom33</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0a0a0a; color: #00ff00; padding: 20px; }
+        .platform { background: #1a1a1a; border: 1px solid #00ff00; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        h1 { color: #00ff00; text-align: center; }
+        a { color: #00aaff; text-decoration: none; }
+        .naic { color: #ffaa00; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>🔒 SANDERS GLOBAL PLATFORMS - FREEDOM33 DEPLOYMENT</h1>
+    <div id="platforms"></div>
+    <script src="platforms.js"></script>
+</body>
+</html
