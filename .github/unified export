@@ -1,0 +1,94 @@
+# ---------------------------
+# UNIFIED EXPORT (JSON + JS DASHBOARD)
+# ---------------------------
+EXPORT_JSON="$EXPORT_DIR/platform_registry.json"
+EXPORT_JS="$BASE_DIR/platforms.js"
+
+# Start files
+echo "{" > "$EXPORT_JSON"
+echo "const platforms = {" > "$EXPORT_JS"
+
+i=0
+COUNT=${#PLATFORM_REGISTRY[@]}
+
+for PLATFORM in "${!PLATFORM_REGISTRY[@]}"; do
+  IFS='|' read -r NAIC URL <<< "${PLATFORM_REGISTRY[$PLATFORM]}"
+  i=$((i+1))
+  comma=","
+  [[ $i -eq $COUNT ]] && comma=""
+
+  # Populate JSON
+  echo "  \"$PLATFORM\": { \"naic\": \"$NAIC\", \"url\": \"$URL\" }$comma" >> "$EXPORT_JSON"
+  # Populate JS for the Frontend
+  echo "  \"$PLATFORM\": { naic: \"$NAIC\", url: \"$URL\" }$comma" >> "$EXPORT_JS"
+done
+
+# Close files
+echo "};" >> "$EXPORT_JS"
+echo "}" >> "$EXPORT_JSON"
+
+# V5 Security: Apply Hard Lock
+chattr +i "$EXPORT_JSON" "$EXPORT_JS"
+<div id="platforms"></div>
+<script src="platforms.js"></script>
+#!/bin/bash
+# ======================================================
+# SANDERS GLOBAL MASTER DEPLOYMENT (FREEDOM33)
+# Goal: Auto-populate Dashboard + Hard-Lock Server
+# ======================================================
+
+set -euo pipefail
+
+# 1. DIRECTORY SETUP
+BASE_DIR="/srv/sanders/platforms"
+EXPORT_DIR="/srv/sanders/baseline/export"
+mkdir -p $BASE_DIR/{automation,audits,data} $EXPORT_DIR
+
+# 2. THE REGISTRY (35 PLATFORMS)
+declare -A PLATFORMS
+PLATFORMS["Sanders AI Doctor"]="621111,541618|https://ai-doctor.sandershomehealthcare.com"
+PLATFORMS["Sanders AI Psychiatrist"]="621330,541618|https://ai-psychiatrist.sandershomehealthcare.com"
+PLATFORMS["Lil Mama"]="621399,541618|https://twin-lil-mama.sanderssecurestack.com"
+PLATFORMS["Baby Girl"]="621399,541618|https://twin-baby-girl.sanderssecurestack.com"
+# ... [Add remaining 31 platforms here] ...
+
+# 3. UNIFIED EXPORT (Clears the "Hold-up")
+# This generates the file your index.html is looking for!
+JS_FILE="$BASE_DIR/platforms.js"
+JSON_FILE="$EXPORT_DIR/platform_registry.json"
+
+echo "const platforms = {" > "$JS_FILE"
+echo "{" > "$JSON_FILE"
+
+i=0
+for NAME in "${!PLATFORMS[@]}"; do
+    IFS='|' read -r NAIC URL <<< "${PLATFORMS[$NAME]}"
+    SLUG=$(echo "$NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+    i=$((i+1))
+    comma=$([[ $i -eq ${#PLATFORMS[@]} ]] && echo "" || echo ",")
+
+    echo "  \"$NAME\": { naic: \"$NAIC\", url: \"$URL\" }$comma" >> "$JS_FILE"
+    echo "  \"$NAME\": { \"naic\": \"$NAIC\", \"url\": \"$URL\" }$comma" >> "$JSON_FILE"
+    
+    # 4. SPAWN SYSTEMD & FOLDERS
+    mkdir -p "$BASE_DIR/$SLUG"
+done
+
+echo "};" >> "$JS_FILE"
+echo "}" >> "$JSON_FILE"
+
+# 5. V5 HARD LOCK
+chattr +i "$JS_FILE" "$JSON_FILE"
+echo "✅ DASHBOARD SYNCED. SYSTEM HARD-LOCKED."
+
+  // This part stays in your HTML to render the data
+  const container = document.getElementById('platforms');
+  Object.entries(platforms).forEach(([name, data]) => {
+    const div = document.createElement('div');
+    div.className = 'platform';
+    div.innerHTML = `<h3>${name}</h3>
+                     <div class="naic">NAIC: ${data.naic}</div>
+                     <a href="${data.url}" target="_blank">${data.url}</a>`;
+    container.appendChild(div);
+  });
+</script>
