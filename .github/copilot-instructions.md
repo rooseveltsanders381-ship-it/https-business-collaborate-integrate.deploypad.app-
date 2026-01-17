@@ -1,3 +1,44 @@
+index.html:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanders Global Platforms - Freedom33</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0a0a0a; color: #00ff00; padding: 20px; }
+        .platform { background: #1a1a1a; border: 1px solid #00ff00; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        h1 { color: #00ff00; text-align: center; }
+        a { color: #00aaff; text-decoration: none; }
+        .naic { color: #ffaa00; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>🔒 SANDERS GLOBAL PLATFORMS - FREEDOM33 DEPLOYMENT</h1>
+    <div id="platforms"></div>
+    <script src="platforms.js"></script>
+</body>
+</html>
+Then add platforms.js:
+const platforms = {
+    "Sanders AI Doctor": { naic: "621111,541618,561612,541110,541512,611430", url: "https://ai-doctor.sandershomehealthcare.com" },
+    "Sanders AI Psychiatrist": { naic: "621330,541618,561612,541110,541512,611430", url: "https://ai-psychiatrist.sandershomehealthcare.com" },
+    "Lil Mama": { naic: "621399,541618,561612,523991,541512,611430", url: "https://twin-lil-mama.sanderssecurestack.com" },
+    "Baby Girl": { naic: "621399,541618,561612,523991,541512,611430", url: "https://twin-baby-girl.sanderssecurestack.com" }
+    // Add all 35 platforms here
+};
+
+const container = document.getElementById('platforms');
+Object.entries(platforms).forEach(([name, data]) => {
+    const div = document.createElement('div');
+    div.className = 'platform';
+    div.innerHTML = `
+        <h3>${name}</h3>
+        <div class="naic">NAIC: ${data.naic}</div>
+        <a href="${data.url}" target="_blank">${data.url}</a>
+    `;
+    container.appendChild(div);
+});
 # Copilot Instructions - Sanders Platforms Monorepo
 
 ## Project Overview
@@ -114,3 +155,44 @@ platform{N}/
 - Starts Express server on `process.env.PORT` (default 3000)
 - Health endpoint: `GET /` responds with "platform{N} running ✅"
 - All platforms follow identical structure for consistency
+index.html:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanders Global Platforms - Freedom33</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0a0a0a; color: #00ff00; padding: 20px; }
+        .platform { background: #1a1a1a; border: 1px solid #00ff00; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        h1 { color: #00ff00; text-align: center; }
+        a { color: #00aaff; text-decoration: none; }
+        .naic { color: #ffaa00; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>🔒 SANDERS GLOBAL PLATFORMS - FREEDOM33 DEPLOYMENT</h1>
+    <div id="platforms"></div>
+    <script src="platforms.js"></script>
+</body>
+</html>
+Then add platforms.js:
+const platforms = {
+    "Sanders AI Doctor": { naic: "621111,541618,561612,541110,541512,611430", url: "https://ai-doctor.sandershomehealthcare.com" },
+    "Sanders AI Psychiatrist": { naic: "621330,541618,561612,541110,541512,611430", url: "https://ai-psychiatrist.sandershomehealthcare.com" },
+    "Lil Mama": { naic: "621399,541618,561612,523991,541512,611430", url: "https://twin-lil-mama.sanderssecurestack.com" },
+    "Baby Girl": { naic: "621399,541618,561612,523991,541512,611430", url: "https://twin-baby-girl.sanderssecurestack.com" }
+    // Add all 35 platforms here
+};
+
+const container = document.getElementById('platforms');
+Object.entries(platforms).forEach(([name, data]) => {
+    const div = document.createElement('div');
+    div.className = 'platform';
+    div.innerHTML = `
+        <h3>${name}</h3>
+        <div class="naic">NAIC: ${data.naic}</div>
+        <a href="${data.url}" target="_blank">${data.url}</a>
+    `;
+    container.appendChild(div);
+});
