@@ -21,6 +21,7 @@ npm test
 Each platform is an Express.js application with the following structure:
 ```
 platform{N}/
+
 ├── package.json              # express@^4.18.2, @supabase/supabase-js@^3.29.0
 └── src/
     └── index.js             # Express server with health check
@@ -148,3 +149,11 @@ const platforms = {
   "Lil Mama": { naic: "621399,541618,561612,523991,541512,611430", url: "https://twin-lil-mama.sanderssecurestack.com" },
   "Baby Girl": { naic: "621399,541618,561612,523991,541512,611430", url: "https://twin-baby-girl.sanderssecurestack.com" }
 };
+{
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
