@@ -63,3 +63,11 @@ Object.entries(platforms).forEach(([name, data]) => {
   `;
   container.appendChild(div);
 });
+{
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
