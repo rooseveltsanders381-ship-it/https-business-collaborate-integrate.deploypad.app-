@@ -1,4 +1,39 @@
-GitHub repo → push README & code → Vercel auto-deploys code
+## 📡 FREEDOM33-GOLD Live Heartbeat
+> **Status:** Monitoring 35+ Sovereign Platforms via Sanders Authority Bot
+
+<div id="freedom33-heartbeat" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; font-family: sans-serif;"></div>
+
+<script>
+const platforms = {
+  "AI Doctor": "https://ai-doctor.sandershomehealthcare.com",
+  "AI Psychiatrist": "https://ai-psychiatrist.sandershomehealthcare.com",
+  "Sanders Coordinator": "https://sanders-coordinator.vercel.app",
+  "Lil Mama": "https://twin-lil-mama.sanderssecurestack.com",
+  "Baby Girl": "https://twin-baby-girl.sanderssecurestack.com"
+  // Add the remaining 30+ platforms here following the same format
+};
+
+const container = document.getElementById("freedom33-heartbeat");
+
+Object.entries(platforms).forEach(([name, url]) => {
+  const card = document.createElement("div");
+  card.style = "border: 1px solid #ccc; padding: 8px; border-radius: 8px; text-align: center; background: #fdfdfd;";
+  card.innerHTML = `
+    <div style="font-weight:bold; font-size:0.9em; margin-bottom:4px;">${name}</div>
+    <div id="status-${name.replace(/\s+/g,'-')}" style="color:#666; font-size:0.8em;">🟡 Checking...</div>
+  `;
+  container.appendChild(card);
+
+  // HEAD request (near-zero resource)
+  fetch(url, { method: 'HEAD', mode: 'no-cors' })
+    .then(() => {
+      document.getElementById(`status-${name.replace(/\s+/g,'-')}`).innerHTML = "🟢 LIVE";
+    })
+    .catch(() => {
+      document.getElementById(`status-${name.replace(/\s+/g,'-')}`).innerHTML = "🔴 OFFLINE";
+    });
+});
+</script>GitHub repo → push README & code → Vercel auto-deploys code
 README contains hyperlinks for live platforms (not executed)# 1️⃣ Ensure your platform_registry.json has exact Vercel slugs & URLs
 # Example entries:
 # {
