@@ -1,4 +1,42 @@
-# Sanders Platforms Monorepo
+# 1️⃣ Ensure your platform_registry.json has exact Vercel slugs & URLs
+# Example entries:
+# {
+#   "Business Collaborate Integrate": {
+#       "slug": "business-collaborate-integrate",
+#       "url": "https://v0-business-collaborate-integrate.vercel.app"
+#   },
+#   "Sanders Home Healthcare": {
+#       "slug": "sanders-home-healthcare-ecosystem",
+#       "url": "https://sanders-home-healthcare-ecosystem.vercel.app"
+#   }
+#   ...remaining 33+ platforms...
+# }
+
+# 2️⃣ Update README.md with live URLs
+README="./README.md"
+REGISTRY="./baseline/export/platform_registry.json"
+
+# Remove previous platform grid section if exists
+sed -i '/<!-- FREEDOM33-PLATFORM-GRID-START -->/,/<!-- FREEDOM33-PLATFORM-GRID-END -->/d' "$README"
+
+# Append new platform grid section
+echo "<!-- FREEDOM33-PLATFORM-GRID-START -->" >> "$README"
+echo "## 📡 FREEDOM33-GLOBAL Platform Grid" >> "$README"
+
+jq -r 'to_entries[] | "- [\(.key)](\(.value.url))"' "$REGISTRY" >> "$README"
+
+echo "<!-- FREEDOM33-PLATFORM-GRID-END -->" >> "$README"
+
+# 3️⃣ Commit changes with Sanders Authority Bot identity
+git config user.name "Sanders Authority Bot"
+git config user.email "authority@sanders.global"
+git add "$README"
+if ! git diff --cached --quiet; then
+    git commit -m "🏅 FREEDOM33-GOLD: README Live URLs Synced"
+    git push origin main
+else
+    echo "No README changes detected; URLs already up-to-date."
+fi# Sanders Platforms Monorepo
 
 Ready-to-deploy monorepo for 33 platforms with Guardian Watchdog and V5 security.
 
