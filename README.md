@@ -1,3 +1,4 @@
+git pull origin main
 git push origin main
 name: FREEDOM33-GOLD Unified Global Deployment
 
