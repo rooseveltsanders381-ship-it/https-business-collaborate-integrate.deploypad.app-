@@ -1,4 +1,87 @@
-"Trigger rebuild"git push origin main
+#!/bin/bash
+# Authority: Sanders Family Trust | Baseline: 2026-01-18
+# Freedom33 Integrity Suite | 35+ Platforms | Ultra-Low Resource
+
+REGISTRY="platform-registry.json"
+TMP_REGISTRY="$REGISTRY.tmp"
+DRIFT_DIR="docs"
+DRIFT_LOG="$DRIFT_DIR/DRIFT_REPORT.md"
+PARALLEL_JOBS=5          # Tune for CPU cores
+TRUST_UPDATE="${TRUST_UPDATE:-false}" # Optional baseline update
+SLACK_WEBHOOK_URL="${SLACK_WEBHOOK_URL:-}" # Optional Slack notifications
+
+mkdir -p "$DRIFT_DIR"
+echo "## 🛡️ Freedom33 Integrity Audit: $(date)" > "$DRIFT_LOG"
+echo "| Platform | Status | Integrity Hash |" >> "$DRIFT_LOG"
+echo "| :--- | :---: | :--- |" >> "$DRIFT_LOG"
+
+VIOLATIONS=0
+
+# Function to generate Gold Hash and check drift
+check_and_hash_platform() {
+    PLATFORM_JSON="$1"
+
+    ID=$(jq -r '.id' <<< "$PLATFORM_JSON")
+    NAME=$(jq -r '.name' <<< "$PLATFORM_JSON")
+    URL=$(jq -r '.url' <<< "$PLATFORM_JSON")
+    GOLD_HASH=$(jq -r '.baseline_hash' <<< "$PLATFORM_JSON")
+
+    # Body-only, whitespace-stripped hash
+    LIVE_HASH=$(curl -sL "$URL" | pup 'body{} text{}' | tr -d '\n\r\t ' | sha256sum | awk '{print $1}')
+
+    # If baseline hash does not exist, initialize
+    if [[ "$GOLD_HASH" == "null" || -z "$GOLD_HASH" ]]; then
+        GOLD_HASH="$LIVE_HASH"
+        jq --arg id "$ID" --arg hash "$GOLD_HASH" \
+           '(.platforms[] | select(.id == $id) | .baseline_hash) = $hash' \
+           "$REGISTRY" > "$TMP_REGISTRY" && mv "$TMP_REGISTRY" "$REGISTRY"
+        echo "🏅 Initialized Gold Hash for $NAME: $GOLD_HASH"
+    fi
+
+    # Compare hashes for drift
+    if [[ "$LIVE_HASH" != "$GOLD_HASH" ]]; then
+        echo "| $NAME | 🚨 DRIFT | \`$LIVE_HASH\` |" >> "$DRIFT_LOG"
+        echo "❌ ALERT: Integrity breach on $NAME!" >&2
+        ((VIOLATIONS++))
+
+        # Optional trusted update
+        if [[ "$TRUST_UPDATE" == "true" ]]; then
+            jq --arg id "$ID" --arg hash "$LIVE_HASH" \
+               '(.platforms[] | select(.id == $id) | .baseline_hash) = $hash' \
+               "$REGISTRY" > "$TMP_REGISTRY" && mv "$TMP_REGISTRY" "$REGISTRY"
+            echo "🔄 Baseline hash updated for $NAME"
+        fi
+    else
+        echo "| $NAME | ✅ MATCH | \`$GOLD_HASH\` |" >> "$DRIFT_LOG"
+    fi
+}
+
+export -f check_and_hash_platform
+export REGISTRY TMP_REGISTRY DRIFT_LOG TRUST_UPDATE
+
+# Run all platforms in parallel
+jq -c '.platforms[]' "$REGISTRY" | parallel -j $PARALLEL_JOBS check_and_hash_platform {}
+
+# Post-drift notifications
+if [[ $VIOLATIONS -gt 0 ]]; then
+    echo "⚠️ Total Violations: $VIOLATIONS. Consult $DRIFT_LOG"
+    if [[ -n "$SLACK_WEBHOOK_URL" ]]; then
+        curl -s -X POST -H 'Content-type: application/json' \
+             --data "{\"text\":\"⚠️ $VIOLATIONS platforms drifted! Check DRIFT_REPORT.md\"}" \
+             "$SLACK_WEBHOOK_URL"
+    fi
+    # Git tagging for audit trail
+    git config user.name "Sanders Authority Bot"
+    git config user.email "authority@sandersfamilytrust.com"
+    git add "$REGISTRY" "$DRIFT_LOG"
+    git commit -m "🚨 ALERT: Drift Detected $(date +'%Y-%m-%d %H:%M')"
+    git tag -a "drift-$(date +%Y%m%d%H%M)" -m "Baseline drift detected"
+    git push origin main --tags
+    exit 1
+fi
+
+echo "✅ All 35+ platforms match baseline integrity."
+exit 0"Trigger rebuild"git push origin main
 git pull origin main
 git push origin main
 name: FREEDOM33-GOLD Unified Global Deployment
