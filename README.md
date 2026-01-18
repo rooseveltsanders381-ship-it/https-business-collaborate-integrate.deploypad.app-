@@ -1,4 +1,5 @@
-# 1️⃣ Ensure your platform_registry.json has exact Vercel slugs & URLs
+GitHub repo → push README & code → Vercel auto-deploys code
+README contains hyperlinks for live platforms (not executed)# 1️⃣ Ensure your platform_registry.json has exact Vercel slugs & URLs
 # Example entries:
 # {
 #   "Business Collaborate Integrate": {
