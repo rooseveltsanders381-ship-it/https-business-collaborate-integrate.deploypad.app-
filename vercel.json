@@ -1,7 +1,4 @@
-</a>
-  `;
-  container.appendChild(div);
-});
+
 {
   "routes": [
     {
