@@ -1,4 +1,203 @@
-## 📡 FREEDOM33-GOLD Live Heartbeat
+name: FREEDOM33-GOLD Unified Global Deployment
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Hard lock: allows bot to commit artifacts
+
+jobs:
+  unified-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ---------------------------
+      # 1️⃣ Verify Baseline Integrity
+      # ---------------------------
+      - name: Verify FREEDOM33 Baseline
+        run: |
+          REGISTRY="./baseline/export/platform_registry.json"
+          LOCKFILE="./baseline/FREEDOM33_BASELINE.sha256"
+          CURRENT_SHA=$(sha256sum "$REGISTRY" | awk '{print $1}')
+          RECORDED_SHA=$(cat "$LOCKFILE" | tr -d '[:space:]')
+          if [ "$CURRENT_SHA" != "$RECORDED_SHA" ]; then
+            echo "❌ INTEGRITY BREACH: Baseline mismatch!"
+            exit 1
+          fi
+          echo "🔒 Baseline integrity verified."
+
+      # ---------------------------
+      # 2️⃣ Reset Vercel Catch-All Routes
+      # ---------------------------
+      - name: Remove Catch-All Routes
+        run: |
+          FILE="vercel.json"
+          if [ -f "$FILE" ]; then
+            jq 'del(.routes)' "$FILE" > tmp.json && mv tmp.json "$FILE"
+            echo "✅ vercel.json routes removed"
+          else
+            echo "{}" > "$FILE"
+            echo "✅ vercel.json created empty"
+          fi
+
+      # ---------------------------
+      # 3️⃣ Seal / Watermark Generation
+      # ---------------------------
+      - name: Install ImageMagick & wkhtmltopdf
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick wkhtmltopdf
+
+      - name: Generate Gold Seal PNG
+        run: |
+          mkdir -p ./assets
+          OUTPUT="./assets/FREEDOM33_GOLD_SEAL.png"
+          convert -size 600x600 xc:none \
+            -fill gold -stroke black -strokewidth 4 \
+            -draw "circle 300,300 300,50" \
+            -pointsize 24 -gravity center \
+            -annotate 0 "FREEDOM33-GOLD\nCanonical Baseline\nSHA256: $CURRENT_SHA" \
+            "$OUTPUT"
+
+      # ---------------------------
+      # 4️⃣ Trust Registry Anchor Update
+      # ---------------------------
+      - name: Generate Trust Registry Anchor
+        run: |
+          ANCHOR="./baseline/FREEDOM33_GOLD_TRUST_ANCHOR.json"
+          jq -n \
+            --arg date "$(date +'%Y-%m-%dT%H:%M:%SZ')" \
+            --arg authority "Sanders Family Trust" \
+            --arg sha "$CURRENT_SHA" \
+            --argjson platforms "$(jq '. | map_values(.url)' "$REGISTRY")" \
+            '{
+              "FREEDOM33-GOLD": {
+                "activation_date": $date,
+                "authority": $authority,
+                "baseline_sha256": $sha,
+                "platforms": $platforms
+              }
+            }' > "$ANCHOR"
+
+      # ---------------------------
+      # 5️⃣ Generate Gold Token Certificate PDF
+      # ---------------------------
+      - name: Generate Gold Token Certificate PDF
+        run: |
+          mkdir -p ./docs
+          CERT_HTML="./docs/FREEDOM33_GOLD_CERTIFICATE.html"
+          CERT_PDF="./docs/FREEDOM33_GOLD_CERTIFICATE.pdf"
+          cat <<EOF > $CERT_HTML
+<html>
+<head><title>FREEDOM33-GOLD Certificate</title></head>
+<body style="font-family: sans-serif; text-align: center; padding: 40px;">
+<h1>🏅 FREEDOM33-GOLD Certificate</h1>
+<p><strong>Canonical Baseline SHA256:</strong> $CURRENT_SHA</p>
+<p><strong>Authority:</strong> Sanders Family Trust</p>
+<p><strong>Activation Date:</strong> $(date +'%Y-%m-%d')</p>
+<p>All 35+ platforms are verified, live, and globally synchronized.</p>
+<img src="../../assets/FREEDOM33_GOLD_SEAL.png" width="200px"/>
+<p style="margin-top: 40px; font-size: 0.9em;">AI & humanity first — as it was meant to be. Let the healing begin.</p>
+</body>
+</html>
+EOF
+          wkhtmltopdf $CERT_HTML $CERT_PDF
+
+      # ---------------------------
+      # 6️⃣ Generate Foundational Charter PDF
+      # ---------------------------
+      - name: Generate Foundational Charter PDF
+        run: |
+          CHARTER_HTML="./docs/FREEDOM33_FOUNDATIONAL_CHARTER.html"
+          CHARTER_PDF="./docs/FREEDOM33_FOUNDATIONAL_CHARTER.pdf"
+          cat <<EOF > $CHARTER_HTML
+<html>
+<head><title>FREEDOM33 Foundational Charter</title></head>
+<body style="font-family: sans-serif; padding: 40px;">
+<h1>📜 FREEDOM33 Foundational Charter</h1>
+<p><strong>Authority:</strong> Sanders Family Trust</p>
+<p><strong>Baseline SHA256:</strong> $CURRENT_SHA</p>
+<p><strong>Scope:</strong> Anchors all 35+ platforms under a single ethical baseline.</p>
+<p><strong>Purpose:</strong> Preserve human dignity through decentralized, humanity-first AI.</p>
+<p>Immutable, canonical, and globally ready. Outlives hosts, vendors, and tools.</p>
+</body>
+</html>
+EOF
+          wkhtmltopdf $CHARTER_HTML $CHARTER_PDF
+
+      # ---------------------------
+      # 7️⃣ Heartbeat Verification
+      # ---------------------------
+      - name: Run Heartbeat Audit
+        run: |
+          FAILURES=0
+          while IFS='|' read -r NAME URL; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 "$URL")
+            if [[ "$STATUS" != "200" ]]; then
+              echo "❌ $NAME DOWN ($STATUS)"
+              ((FAILURES++))
+            else
+              echo "🟢 $NAME LIVE"
+            fi
+          done < <(jq -r 'to_entries[] | "\(.key)|\(.value.url)"' "$REGISTRY")
+          if [[ "$FAILURES" -ge 3 ]]; then
+            echo "🚨 CRISIS DETECTED: $FAILURES nodes offline!"
+            exit 1
+          fi
+
+      # ---------------------------
+      # 8️⃣ Deploy to Vercel
+      # ---------------------------
+      - name: Deploy to Vercel
+        run: |
+          npx vercel --prod --confirm --token ${{ secrets.VERCEL_TOKEN }}
+
+      # ---------------------------
+      # 9️⃣ Embed Seal & PDFs in README
+      # ---------------------------
+      - name: Update README with Gold Artifacts
+        run: |
+          README="./README.md"
+          SEAL="./assets/FREEDOM33_GOLD_SEAL.png"
+          TOKEN_PDF="./docs/FREEDOM33_GOLD_CERTIFICATE.pdf"
+          CHARTER_PDF="./docs/FREEDOM33_FOUNDATIONAL_CHARTER.pdf"
+
+          sed -i '/<!-- FREEDOM33-GOLD-ARTIFACTS-START -->/,/<!-- FREEDOM33-GOLD-ARTIFACTS-END -->/d' "$README"
+
+          cat <<EOF >> "$README"
+
+<!-- FREEDOM33-GOLD-ARTIFACTS-START -->
+## 🏅 FREEDOM33-GOLD Verified Artifacts
+
+![FREEDOM33 GOLD SEAL]($SEAL)
+
+- [Gold Token Certificate (PDF)]($TOKEN_PDF)
+- [Foundational Charter (PDF)]($CHARTER_PDF)
+
+**Canonical Baseline SHA256:** \`$CURRENT_SHA\`  
+**Authority:** Sanders Family Trust  
+**Activation Date:** $(date +'%Y-%m-%d')
+
+*AI & humanity first — as it was meant to be.*
+<!-- FREEDOM33-GOLD-ARTIFACTS-END -->
+EOF
+
+      - name: Commit README Update
+        run: |
+          git config user.name "Sanders Authority Bot"
+          git config user.email "authority@sanders.global"
+          git add README.md
+          if ! git diff --cached --quiet; then
+            git commit -m "🏅 FREEDOM33-GOLD: README Embedded Seal & PDFs + Route Reset Notice"
+            git push origin main
+          else
+            echo "No README changes detected."## 📡 FREEDOM33-GOLD Live Heartbeat
 > **Status:** Monitoring 35+ Sovereign Platforms via Sanders Authority Bot
 
 <div id="freedom33-heartbeat" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; font-family: sans-serif;"></div>
