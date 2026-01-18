@@ -5,6 +5,70 @@
 
 <script>
 const platforms = {
+  "Sanders AI Doctor": "https://ai-doctor.sandershomehealthcare.com",
+  "Sanders AI Psychiatrist": "https://ai-psychiatrist.sandershomehealthcare.com",
+  "Sanders AI Recognition": "https://ai-recognition.sandersglobal.com",
+  "Sanders Omniconm": "https://omniconm.sandersglobal.com",
+  "Sanders Steward Sentinel": "https://steward-sentinel.sanderssecurestack.com",
+  "Sanders Patriot Saint": "https://patriot-saint.sandersglobal.com",
+  "Sanders Gia Mind Balance": "https://gia-mind.sandersglobal.com",
+  "Sanders Grantwriter": "https://grantwriter.sanders.global",
+  "Sanders Freedom Revolution": "https://freedom-rev.sandersglobal.com",
+  "Sanders Tactical Training": "https://tactical-training.sandersglobal.com",
+  "Sanders Martial Academy": "https://martial-academy.sandersglobal.com",
+  "Sanders Leadership Institute": "https://leadership-institute.sandersglobal.com",
+  "Sanders Fitness & Wellness": "https://fitness-wellness.sandersglobal.com",
+  "Sanders Advanced Academics": "https://advanced-academics.sandersglobal.com",
+  "Sanders Recon Ops": "https://recon-ops.sandersglobal.com",
+  "Sanders Guardian Sentinel": "https://guardian-sentinel.sanderssecurestack.com",
+  "Sanders Big Data Mind": "https://big-data-mind.sandersglobal.com",
+  "Sanders Strategy Hub": "https://strategy-hub.sandersglobal.com",
+  "Sanders Global Freedom": "https://global-freedom.sandersglobal.com",
+  "Sanders Health Solutions": "https://health-solutions.sandershomehealthcare.com",
+  "Sanders Coordinator": "https://sanders-coordinator.vercel.app",
+  "Sanders Intelligence Ops": "https://intel-ops.sandersglobal.com",
+  "Sanders Family Council": "https://family-council.sandersglobal.com",
+  "Sanders Elite Leadership": "https://elite-leadership.sandersglobal.com",
+  "Sanders Combat Academy": "https://combat-academy.sandersglobal.com",
+  "Sanders Tactical Edge": "https://tactical-edge.sandersglobal.com",
+  "Sanders Wellness Center": "https://wellness-center.sandersglobal.com",
+  "Sanders Knowledge Base": "https://knowledge-base.sandersglobal.com",
+  "Sanders AI Strategy": "https://ai-strategy.sandersglobal.com",
+  "Sanders Freedom Ops": "https://freedom-ops.sandersglobal.com",
+  "Sanders Mind Guardian": "https://mind-guardian.sandersglobal.com",
+  "Sanders Watchdog Alpha": "https://watchdog-alpha.sanderssecurestack.com",
+  "Sanders Watchdog Beta": "https://watchdog-beta.sanderssecurestack.com",
+  "Lil Mama": "https://twin-lil-mama.sanderssecurestack.com",
+  "Baby Girl": "https://twin-baby-girl.sanderssecurestack.com"
+};
+
+const container = document.getElementById("freedom33-heartbeat");
+
+Object.entries(platforms).forEach(([name, url]) => {
+  const card = document.createElement("div");
+  card.style = "border: 1px solid #ccc; padding: 8px; border-radius: 8px; text-align: center; background: #fdfdfd;";
+  card.innerHTML = `
+    <div style="font-weight:bold; font-size:0.9em; margin-bottom:4px;">${name}</div>
+    <div id="status-${name.replace(/\s+/g,'-')}" style="color:#666; font-size:0.8em;">🟡 Checking...</div>
+  `;
+  container.appendChild(card);
+
+  // HEAD request (near-zero resource)
+  fetch(url, { method: 'HEAD', mode: 'no-cors' })
+    .then(() => {
+      document.getElementById(`status-${name.replace(/\s+/g,'-')}`).innerHTML = "🟢 LIVE";
+    })
+    .catch(() => {
+      document.getElementById(`status-${name.replace(/\s+/g,'-')}`).innerHTML = "🔴 OFFLINE";
+    });
+});
+</script>## 📡 FREEDOM33-GOLD Live Heartbeat
+> **Status:** Monitoring 35+ Sovereign Platforms via Sanders Authority Bot
+
+<div id="freedom33-heartbeat" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; font-family: sans-serif;"></div>
+
+<script>
+const platforms = {
   "AI Doctor": "https://ai-doctor.sandershomehealthcare.com",
   "AI Psychiatrist": "https://ai-psychiatrist.sandershomehealthcare.com",
   "Sanders Coordinator": "https://sanders-coordinator.vercel.app",
