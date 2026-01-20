@@ -1,4 +1,4 @@
-LICENSE_AND_CERTS/     # Auto-generated certification files
+[![Deploy Freedom33 Ultra Master](https://img.shields.io/badge/Deploy-Freedom33_Ultra_Master-brightgreen)](https://github.com/YourUsername/YourRepo/actions/workflows/freedom33_auto_deploy.yml)LICENSE_AND_CERTS/     # Auto-generated certification files
 platforms/             # Auto-generated platform directories
 master_ledger.csv      # Auto-updated ledger CSV
 master_ledger.json     # Auto-updated ledger JSON
