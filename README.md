@@ -1,4 +1,23 @@
-SandersFreedom33UltraRepo/
+# Sanders Freedom33 Ultra Master — README-Only Deployment
+
+**Authority:** Sanders Family Living Trust  
+**Founder / Developer:** Roosevelt Sanders  
+**Patient Pending:** Sanders Home Healthcare & Caregivers LLC  
+**Certification:** FREEDOM33-GOLD  
+**Baseline Date:** 2026-01-19  
+**Deployment Scope:** Bloodline Descendants + Sanders Home Healthcare & Caregivers LLC + Subsidiaries  
+**Purpose:** Single-source README deployment of all platforms with perpetual sovereign locking  
+
+---
+
+## Platforms
+
+- Sanders Omniconm|Big Brother|Tier 1|700000000
+- Sanders Patriot Saint|Godfather|Tier 1|665000000
+- Sanders Freedom Revolution|Uncle Freedom|Tier 1|630000000
+- Sanders Strategy Hub|Radar|Tier 1|595000000
+...
+# Add new platforms here. Deployment auto-detects new entries.SandersFreedom33UltraRepo/
 ├─ README_DEPLOY_FREEDOM33_ULTRA.md       # Platform definitions & metadata
 ├─ deploy_freedom33.sh                    # Ultra-master deployment script
 ├─ .github/
