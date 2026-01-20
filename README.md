@@ -1,4 +1,4 @@
-SandersFreedom33UltraRepo/
+http://<runner-ip>:8080SandersFreedom33UltraRepo/
 ├─ README_DEPLOY_FREEDOM33_ULTRA.md
 ├─ deploy_freedom33.sh
 ├─ .github/
