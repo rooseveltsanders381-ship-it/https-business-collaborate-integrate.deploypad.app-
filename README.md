@@ -1,4 +1,10 @@
-[![Deploy Freedom33 Ultra Master](https://img.shields.io/badge/Deploy-Freedom33_Ultra_Master-brightgreen)](https://github.com/YourUsername/YourRepo/actions/workflows/freedom33_auto_deploy.yml)LICENSE_AND_CERTS/     # Auto-generated certification files
+name: Freedom33 Auto-Deploy
+
+on:
+  push:
+    paths:
+      - 'README_DEPLOY_FREEDOM33_ULTRA.md'
+  workflow_dispatch:  # <-- enables manual one-click deployment[![Deploy Freedom33 Ultra Master](https://img.shields.io/badge/Deploy-Freedom33_Ultra_Master-brightgreen)](https://github.com/YourUsername/YourRepo/actions/workflows/freedom33_auto_deploy.yml)LICENSE_AND_CERTS/     # Auto-generated certification files
 platforms/             # Auto-generated platform directories
 master_ledger.csv      # Auto-updated ledger CSV
 master_ledger.json     # Auto-updated ledger JSON
