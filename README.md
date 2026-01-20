@@ -1,4 +1,26 @@
-# Sanders Freedom33 Ultra Master — README-Only Deployment
+name: Freedom33 Auto-Deploy
+
+on:
+  push:
+    paths:
+      - 'README_DEPLOY_FREEDOM33_ULTRA.md'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Make Deployment Script Executable
+        run: chmod +x deploy_freedom33.sh
+
+      - name: Run README-Only Deployment
+        run: |
+          echo "✅ Starting automated Freedom33 deployment..."
+          ./deploy_freedom33.sh
+          echo "🎉 Deployment complete. All platforms certified and locked."# Sanders Freedom33 Ultra Master — README-Only Deployment
 
 **Authority:** Sanders Family Living Trust  
 **Founder / Developer:** Roosevelt Sanders  
