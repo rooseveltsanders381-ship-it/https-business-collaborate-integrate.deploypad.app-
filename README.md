@@ -1,4 +1,14 @@
-http://<runner-ip>:8080SandersFreedom33UltraRepo/
+SandersFreedom33UltraRepo/
+├─ README_DEPLOY_FREEDOM33_ULTRA.md       # Platform definitions & metadata
+├─ deploy_freedom33.sh                    # Ultra-master deployment script
+├─ .github/
+│   └─ workflows/
+│       └─ freedom33_auto_deploy.yml      # GitHub Actions workflow
+├─ LICENSE_AND_CERTS/                     # Auto-created certifications
+├─ platforms/                             # Auto-created platform folders
+├─ master_ledger.csv                       # Auto-updated ledger CSV
+├─ master_ledger.json                      # Auto-updated ledger JSON
+├─ deployment_watchdog.log                 # Auto-updated deployment logshttp://<runner-ip>:8080SandersFreedom33UltraRepo/
 ├─ README_DEPLOY_FREEDOM33_ULTRA.md
 ├─ deploy_freedom33.sh
 ├─ .github/
