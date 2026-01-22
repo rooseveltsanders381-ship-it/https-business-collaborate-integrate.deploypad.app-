@@ -1,4 +1,355 @@
-# Sanders Legacy Trust Platforms - Repository Structure
+# .github/workflows/deploy-vm.yml
+# =====================================================
+# DEPLOY TO VMS - Individual VM Deployment
+# Triggers on: push to main, manual dispatch
+# =====================================================
+name: Deploy to VMs
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'platforms/**'
+      - 'deployment/vm/**'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to deploy (or "all")'
+        required: true
+        default: 'all'
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_ZONE: us-central1-c
+
+jobs:
+  deploy-vm:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+    
+    - name: Configure SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H 34.133.172.131 >> ~/.ssh/known_hosts
+        ssh-keyscan -H 35.238.209.6 >> ~/.ssh/known_hosts
+        ssh-keyscan -H 34.27.79.1 >> ~/.ssh/known_hosts
+    
+    - name: Deploy platforms to VMs
+      run: |
+        # Get list of VMs
+        INSTANCES=$(gcloud compute instances list --format="value(name)" --filter="labels.authority=sanders-legacy-trust")
+        
+        for INSTANCE in $INSTANCES; do
+          IP=$(gcloud compute instances describe $INSTANCE --zone=$GCP_ZONE --format="value(networkInterfaces[0].accessConfigs[0].natIP)")
+          
+          echo "Deploying to $INSTANCE ($IP)..."
+          
+          # SSH and update platform code
+          ssh -o StrictHostKeyChecking=no deploy@$IP << 'ENDSSH'
+            cd /opt/*/
+            git pull origin main
+            pip3 install -r requirements.txt
+            sudo systemctl restart platform.service || pkill -f main.py && nohup python3 main.py &
+ENDSSH
+        done
+    
+    - name: Verify deployments
+      run: |
+        INSTANCES=$(gcloud compute instances list --format="value(name)" --filter="labels.authority=sanders-legacy-trust")
+        
+        for INSTANCE in $INSTANCES; do
+          IP=$(gcloud compute instances describe $INSTANCE --zone=$GCP_ZONE --format="value(networkInterfaces[0].accessConfigs[0].natIP)")
+          
+          # Health check
+          if curl -f -m 10 "http://$IP/health"; then
+            echo "✅ $INSTANCE healthy"
+          else
+            echo "❌ $INSTANCE health check failed"
+            exit 1
+          fi
+        done
+
+---
+# .github/workflows/deploy-docker.yml
+# =====================================================
+# DEPLOY TO DOCKER - Container Deployment
+# Triggers on: push to main, manual dispatch
+# =====================================================
+name: Deploy to Docker
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'platforms/**'
+      - 'deployment/docker/**'
+  workflow_dispatch:
+
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  DOCKER_IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/sanders-platform:latest
+  HOST1: 34.133.172.131
+  HOST2: 35.238.209.6
+  HOST3: 34.27.79.1
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+    
+    - name: Configure Docker
+      run: gcloud auth configure-docker
+    
+    - name: Build Docker image
+      run: |
+        docker build -f deployment/docker/Dockerfile -t $DOCKER_IMAGE .
+    
+    - name: Push Docker image
+      run: |
+        docker push $DOCKER_IMAGE
+    
+    - name: Image digest
+      run: |
+        docker inspect --format='{{index .RepoDigests 0}}' $DOCKER_IMAGE
+
+  deploy-containers:
+    needs: build-image
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        host: [HOST1, HOST2, HOST3]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Configure SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ env[matrix.host] }} >> ~/.ssh/known_hosts
+    
+    - name: Deploy containers
+      run: |
+        ssh deploy@${{ env[matrix.host] }} << 'ENDSSH'
+          # Pull latest image
+          docker pull $DOCKER_IMAGE
+          
+          # Update all containers on this host
+          for CONTAINER in $(docker ps -a --format '{{.Names}}'); do
+            echo "Updating $CONTAINER..."
+            docker stop $CONTAINER
+            docker rm $CONTAINER
+            docker run -d --name $CONTAINER --restart always \
+              $(docker inspect $CONTAINER --format='{{range .Config.Env}}-e {{.}} {{end}}') \
+              $(docker inspect $CONTAINER --format='{{range .HostConfig.PortBindings}}{{range .}}-p {{.HostPort}}:3000 {{end}}{{end}}') \
+              --memory=2g --cpus=1.5 \
+              $DOCKER_IMAGE
+          done
+ENDSSH
+    
+    - name: Verify containers
+      run: |
+        ssh deploy@${{ env[matrix.host] }} << 'ENDSSH'
+          for CONTAINER in $(docker ps --format '{{.Names}}'); do
+            PORT=$(docker port $CONTAINER | cut -d: -f2)
+            if curl -f -m 10 http://localhost:$PORT/health; then
+              echo "✅ $CONTAINER healthy"
+            else
+              echo "❌ $CONTAINER unhealthy"
+              exit 1
+            fi
+          done
+ENDSSH
+
+---
+# .github/workflows/test-platforms.yml
+# =====================================================
+# TEST PLATFORMS - Run tests before deployment
+# =====================================================
+name: Test Platforms
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - sanders-sentinel
+          - sanders-omniconm
+          - sanders-grantwriter
+          - lil-mama
+          - baby-girl
+          # Add all 33 platforms
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        cd platforms/${{ matrix.platform }}
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    
+    - name: Run tests
+      run: |
+        cd platforms/${{ matrix.platform }}
+        if [ -d "tests" ]; then
+          pytest tests/ -v --cov=. --cov-report=xml
+        else
+          echo "No tests found for ${{ matrix.platform }}"
+        fi
+    
+    - name: Verify NAICS codes
+      run: |
+        cd platforms/${{ matrix.platform }}
+        if [ -f "naics.json" ]; then
+          python3 -c "
+import json
+with open('naics.json') as f:
+    data = json.load(f)
+    assert len(data['naics_codes']) == 6, 'Must have exactly 6 NAICS codes'
+    print('✅ NAICS validation passed')
+          "
+        else
+          echo "❌ naics.json not found"
+          exit 1
+        fi
+    
+    - name: Check humanity protocols
+      run: |
+        cd platforms/${{ matrix.platform }}
+        python3 -c "
+import json
+with open('config.json') as f:
+    config = json.load(f)
+    assert config.get('humanity_first') == True, 'humanity_first must be True'
+    assert config.get('zero_weaponization') == True, 'zero_weaponization must be True'
+    assert config.get('glass_box') == True, 'glass_box must be True'
+    print('✅ Humanity protocols verified')
+        "
+
+---
+# .github/workflows/backup.yml
+# =====================================================
+# BACKUP - Daily automated backups
+# =====================================================
+name: Backup Platforms
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+    
+    - name: Create VM snapshots
+      run: |
+        INSTANCES=$(gcloud compute instances list --format="value(name)" --filter="labels.authority=sanders-legacy-trust")
+        
+        for INSTANCE in $INSTANCES; do
+          DISK=$(gcloud compute instances describe $INSTANCE --zone=us-central1-c --format="value(disks[0].source.basename())")
+          SNAPSHOT_NAME="${INSTANCE}-snapshot-$(date +%Y%m%d-%H%M%S)"
+          
+          echo "Creating snapshot: $SNAPSHOT_NAME"
+          gcloud compute disks snapshot $DISK \
+            --zone=us-central1-c \
+            --snapshot-names=$SNAPSHOT_NAME \
+            --labels=backup=daily,authority=sanders-legacy-trust
+        done
+    
+    - name: Cleanup old snapshots
+      run: |
+        # Keep last 7 days of snapshots
+        CUTOFF_DATE=$(date -d '7 days ago' +%Y%m%d)
+        
+        gcloud compute snapshots list --filter="labels.backup=daily AND creationTimestamp < $CUTOFF_DATE" --format="value(name)" | \
+        while read SNAPSHOT; do
+          echo "Deleting old snapshot: $SNAPSHOT"
+          gcloud compute snapshots delete $SNAPSHOT --quiet
+        done
+
+---
+# .github/workflows/security-scan.yml
+# =====================================================
+# SECURITY SCAN - Vulnerability scanning
+# =====================================================
+name: Security Scan
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+    
+    - name: Upload Trivy results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Check for secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD# Sanders Legacy Trust Platforms - Repository Structure
 
 ## 📁 Root Directory Layout
 
