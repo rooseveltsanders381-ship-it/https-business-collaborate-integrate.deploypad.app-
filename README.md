@@ -1,4 +1,238 @@
-# 🏅 Sanders Freedom33 Gold - Ultra Master Platform Registry 🏅
+# Sanders Legacy Trust Platforms - Repository Structure
+
+## 📁 Root Directory Layout
+
+```
+sanders-legacy-trust-platforms/
+├── README.md                          # Main documentation
+├── LICENSE                            # Legal/licensing
+├── .gitignore
+├── .github/
+│   └── workflows/
+│       ├── deploy-vm.yml             # VM deployment automation
+│       ├── deploy-docker.yml         # Docker deployment automation
+│       └── test-platforms.yml        # Platform testing
+│
+├── platforms/                         # Individual platform code
+│   ├── sanders-sentinel/
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   ├── config.json
+│   │   ├── naics.json               # NAICS codes: 541512,541513,541519,561621,518210,541690
+│   │   └── README.md
+│   │
+│   ├── sanders-omniconm/
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   ├── config.json
+│   │   ├── naics.json               # NAICS codes: 517810,518210,541511,541512,541519,519190
+│   │   └── README.md
+│   │
+│   ├── sanders-grantwriter/
+│   │   ├── main.py
+│   │   ├── requirements.txt
+│   │   ├── config.json
+│   │   ├── naics.json               # NAICS codes: 541611,541612,541618,561499,541990,813211
+│   │   └── README.md
+│   │
+│   ├── lil-mama/
+│   ├── baby-girl/
+│   ├── gai-mind/
+│   ├── ai-doctor/
+│   ├── patriot-saint/
+│   ├── sanders-home-healthcare/
+│   ├── sanders-senior-living/
+│   ├── sanders-legal-helpers/
+│   ├── sanders-education/
+│   ├── sanders-finance/
+│   ├── sanders-retail/
+│   ├── sanders-logistics/
+│   ├── sanders-security/
+│   ├── sanders-real-estate/
+│   ├── sanders-energy/
+│   ├── sanders-transportation/
+│   ├── sanders-agriculture/
+│   ├── sanders-manufacturing/
+│   ├── sanders-hospitality/
+│   ├── sanders-entertainment/
+│   ├── sanders-sports/
+│   ├── sanders-wellness/
+│   ├── sanders-travel/
+│   ├── sanders-ai-research/
+│   ├── sanders-research/
+│   ├── sanders-media/
+│   ├── sanders-communications/
+│   ├── sanders-compliance/
+│   ├── sanders-coordinator/
+│   └── sanders-consulting/
+│
+├── shared/                            # Shared libraries
+│   ├── naics_bridge.py               # NAICS coordination logic
+│   ├── humanity_protocols.py        # Humanity-first enforcement
+│   ├── zero_weaponization.py        # Weaponization prevention
+│   ├── glass_box.py                 # Transparency/audit
+│   └── common_utils.py
+│
+├── deployment/                        # Deployment scripts
+│   ├── vm/
+│   │   ├── create_vms.sh            # Create 33 VMs
+│   │   ├── startup_template.sh      # Template startup script
+│   │   └── vm_config.json           # VM configurations
+│   │
+│   ├── docker/
+│   │   ├── Dockerfile               # Multi-platform Docker image
+│   │   ├── docker-compose.yml       # Compose for all platforms
+│   │   └── deploy_docker.sh         # Docker deployment script
+│   │
+│   └── zero_trust/
+│       ├── token_generator.js       # Generate DEPLOY_TOKENs
+│       ├── api_server.js            # Zero-trust API
+│       └── deployment_gate.sh       # Token validation
+│
+├── infrastructure/                    # Infrastructure as Code
+│   ├── terraform/
+│   │   ├── main.tf                  # GCP infrastructure
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   │
+│   └── gcp/
+│       ├── firewall_rules.sh        # Firewall configuration
+│       ├── networking.sh            # VPC/subnet setup
+│       └── dns_records.sh           # Domain mapping
+│
+├── monitoring/                        # Monitoring & observability
+│   ├── prometheus/
+│   │   └── config.yml
+│   ├── grafana/
+│   │   └── dashboards/
+│   └── health_checks.py
+│
+├── certification/                     # Brand & compliance
+│   ├── freedom33_gold_registry.py   # Brand registry system
+│   ├── naics_verification.py       # NAICS validation
+│   └── certifications/              # Platform certifications
+│       ├── sanders-sentinel.json
+│       ├── sanders-omniconm.json
+│       └── ... (one per platform)
+│
+├── docs/                             # Documentation
+│   ├── architecture.md
+│   ├── naics_bridges.md
+│   ├── deployment_guide.md
+│   ├── api_reference.md
+│   └── platform_guides/
+│       ├── sanders-sentinel.md
+│       └── ... (one per platform)
+│
+└── tests/                            # Testing
+    ├── unit/
+    ├── integration/
+    └── e2e/
+```
+
+## 📝 Key Files to Create
+
+### Root README.md
+```markdown
+# Sanders Legacy Trust Platforms
+
+**Authority:** Sanders Family Living Trust  
+**Founder:** Roosevelt Sanders  
+**Certification:** FREEDOM33-GOLD
+
+## 33 NAICS-Based Platforms
+
+Each platform connects 6 NAICS industry codes for seamless disaster coordination.
+
+### Deployment Options
+
+1. **Production VMs** - 33 individual VMs (one per platform)
+2. **Docker Containers** - 3 hosts with 11 platforms each
+3. **Hybrid** - Both for redundancy and testing
+
+[Full documentation](./docs/)
+```
+
+### platforms/[platform-name]/naics.json (Example)
+```json
+{
+  "platform": "Sanders Sentinel",
+  "naics_codes": [
+    "541512",
+    "541513", 
+    "541519",
+    "561621",
+    "518210",
+    "541690"
+  ],
+  "bridges": {
+    "sanders-omniconm": ["518210", "541519"],
+    "lil-mama": ["541512", "541519", "561621"],
+    "baby-girl": ["541512", "541519", "561621"]
+  }
+}
+```
+
+### platforms/[platform-name]/config.json (Example)
+```json
+{
+  "name": "Sanders Sentinel",
+  "nickname": "Alpha Watchdog",
+  "tier": 2,
+  "classification": "TS/SCI",
+  "annual_fee": 455000000,
+  "port": 3001,
+  "health_check": "/health",
+  "humanity_first": true,
+  "zero_weaponization": true,
+  "glass_box": true
+}
+```
+
+## 🚀 Quick Start
+
+### Clone Repository
+```bash
+git clone https://github.com/rooseveltsanders381-ship-it/sanders-legacy-trust-platforms.git
+cd sanders-legacy-trust-platforms
+```
+
+### Deploy All VMs
+```bash
+cd deployment/vm
+./create_vms.sh
+```
+
+### Deploy Docker Containers
+```bash
+cd deployment/docker
+./deploy_docker.sh
+```
+
+## 📊 Platform Distribution
+
+- **Host 1 (34.133.172.131):** Guardians & Critical (11 platforms)
+- **Host 2 (35.238.209.6):** Operations & Infrastructure (11 platforms)
+- **Host 3 (34.27.79.1):** Support Services & Lifestyle (11 platforms)
+
+## 🔒 Security
+
+- Zero-trust deployment with token validation
+- NAICS bridge verification
+- Humanity-first protocol enforcement
+- Brand certification locked with SHA256
+
+## 📄 License
+
+© 2026 Sanders Family Living Trust. All rights reserved.
+```
+
+## 🎯 Next Steps
+
+1. Create this structure in your GitHub repo
+2. Commit the deployment scripts I'll create
+3. Set up GitHub Actions workflows
+4. Deploy platforms using automated pipelines# 🏅 Sanders Freedom33 Gold - Ultra Master Platform Registry 🏅
 
 ---
 
