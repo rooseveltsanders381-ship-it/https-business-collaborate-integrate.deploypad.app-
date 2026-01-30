@@ -1,5 +1,5 @@
-Repository name: sanders-global-diamond
-Description: Sanders Global - Humanitarian Disaster Response Platform
+sanders-global-diamond
+Sanders Global - Humanitarian Disaster Response Platform
 Visibility: ☑️ Public (so defensive publication works)
 
 # 🚀 Sanders Legacy Trust Platforms - Complete Deployment Guide
